@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Bulldog Dispensary | Contact &amp; Lounge Bookings</title>
+  
+  <!-- Premium Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,700;0,800;0,900;1,900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Firebase JS SDK compat CDN -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics-compat.js"></script>
+
+  <!-- Tailwind Configuration -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Montserrat', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            spotGreen: {
+              DEFAULT: '#68bc34', // Brand Spot Green
+              light: '#76c043',
+              dark: '#5aa32c',
+            },
+            spotDark: {
+              DEFAULT: '#0d0d0d',
+              card: '#121212',
+              border: '#1f1f1f',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    .glow-green {
+      box-shadow: 0 0 50px -10px rgba(104, 188, 52, 0.15);
+    }
+    .glow-text-green {
+      text-shadow: 0 0 20px rgba(104, 188, 52, 0.4);
+    }
+  </style>
+</head>
+<body class="bg-white text-zinc-800 font-sans min-h-screen flex flex-col antialiased">
+
+  <!-- Age Verification Modal (Global Shared) -->
+  <div id="age-gate" class="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-md transition-opacity duration-300 hidden">
+    <div class="relative w-full max-w-md p-8 mx-4 border border-zinc-800 rounded-2xl bg-[#0d0d0d] text-center shadow-2xl">
+      <div class="inline-flex items-center justify-center mb-6">
+        <img src="./src/assets/images/bulldog_logo_1784640284638.jpg" alt="The Bulldog Wellington Logo" class="w-20 h-20 rounded-full object-cover border border-[#68bc34]/20 shadow-lg shadow-[#68bc34]/10">
+      </div>
+      <h2 class="text-2xl font-display font-black text-white mb-2 tracking-tight uppercase">Age Verification</h2>
+      <p class="text-sm text-zinc-400 mb-8 font-sans leading-relaxed">
+        Are you 18 years or older to view our inventory and join our members-only collective?
+      </p>
+      <div class="space-y-3">
+        <button id="btn-verify-yes" class="w-full py-3.5 px-6 bg-[#68bc34] hover:bg-[#5aa32c] text-white font-extrabold uppercase tracking-wider rounded-xl transition duration-200 shadow-lg shadow-[#68bc34]/10 text-sm cursor-pointer">
+          Yes, I am 18+
+        </button>
+        <button id="btn-verify-no" class="w-full py-3.5 px-6 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white font-medium rounded-xl transition duration-200 border border-zinc-800 text-sm">
+          No, exit
+        </button>
+      </div>
+      <p class="text-xs text-zinc-600 mt-6 leading-normal font-sans">
+        By clicking verify, you confirm that you are of legal age (18 or older) under South African law.
+      </p>
+    </div>
+  </div>
+
+  <!-- Club Membership / Unlock Access Modal -->
+  <div id="club-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md transition-opacity duration-300 hidden">
+    <div class="relative w-full max-w-4xl p-6 sm:p-10 mx-4 border border-zinc-800 rounded-3xl bg-[#121212] shadow-2xl overflow-y-auto max-h-[90vh]">
+      <button id="close-club-modal" class="absolute top-6 right-6 text-zinc-400 hover:text-white transition focus:outline-none">
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+
+      <div class="text-center space-y-3 mb-8">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#68bc34]/10 text-[#68bc34] text-xs font-mono border border-[#68bc34]/20 uppercase">
+          Wellington Social Club
+        </span>
+        <h2 class="text-3xl font-display font-black text-white tracking-tight uppercase">Unlock Members-Only Access</h2>
+        <p class="text-sm text-zinc-400 max-w-md mx-auto">
+          We operate as a legal private members collective. Select your pass to explore our lounge, premium dispensary catalog, and amenities.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <!-- Pass 1: Day Pass -->
+        <div class="p-5 rounded-2xl bg-zinc-900/60 border border-zinc-800 hover:border-[#68bc34]/40 transition duration-300 flex flex-col justify-between space-y-5">
+          <div class="space-y-3">
+            <div class="flex justify-between items-start">
+              <div>
+                <span class="text-[10px] font-mono uppercase text-zinc-500">Access Card</span>
+                <h3 class="text-lg font-display font-extrabold text-white uppercase mt-0.5">Day Pass</h3>
+              </div>
+              <span class="py-1 px-2.5 rounded bg-[#68bc34]/10 text-[#68bc34] font-mono text-xs font-bold border border-[#68bc34]/20">
+                R 15
+              </span>
+            </div>
+            <ul class="space-y-2 text-[11px] text-zinc-400">
+              <li class="flex items-center gap-2">
+                <i data-lucide="check" class="w-3.5 h-3.5 text-[#68bc34] shrink-0"></i>
+                <span>Full access to dispensary catalog &amp; smoking lounge</span>
+              </li>
+              <li class="flex items-center gap-2">
+                <i data-lucide="check" class="w-3.5 h-3.5 text-[#68bc34] shrink-0"></i>
+                <span>In-store product reservation privileges</span>
+              </li>
+              <li class="flex items-center gap-2">
+                <i data-lucide="check" class="w-3.5 h-3.5 text-[#68bc34] shrink-0"></i>
+                <span>Compliant private collective membership access</span>
+              </li>
+            </ul>
+          </div>
+          <button class="btn-claim-pass w-full py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white font-bold uppercase text-xs tracking-wider rounded-xl transition cursor-pointer font-mono" data-pass="day" data-price="R 15">
+            Get Day Pass
+          </button>
+        </div>
+
+        <!-- Pass 2: Week Pass -->
+        <div class="p-5 rounded-2xl bg-zinc-900/60 border border-zinc-800 hover:border-[#68bc34]/40 transition duration-300 flex flex-col justify-between space-y-5">
+          <div class="space-y-3">
+            <div class="flex justify-between items-start">
+              <div>
+                <span class="text-[10px] font-mono uppercase text-zinc-500">Access Card</span>
+                <h3 class="text-lg font-display font-extrabold text-white uppercase mt-0.5">Week Pass</h3>
+              </div>
+              <span class="py-1 px-2.5 rounded bg-[#68bc34]/10 text-[#68bc34] font-mono text-xs font-bold border border-[#68bc34]/20">
+                R 25
+              </span>
+            </div>
+            <ul class="space-y-2 text-[11px] text-zinc-400">
+              <li class="flex items-center gap-2">
+                <i data-lucide="check" class="w-3.5 h-3.5 text-[#68bc34] shrink-0"></i>
+                <span>Full access to dispensary catalog &amp; smoking lounge</span>
+              </li>
+              <li class="flex items-center gap-2">
+                <i data-lucide="check" class="w-3.5 h-3.5 text-[#68bc34] shrink-0"></i>
+                <span>In-store product reservation privileges</span>
+              </li>
+              <li class="flex items-center gap-2">
+                <i data-lucide="check" class="w-3.5 h-3.5 text-[#68bc34] shrink-0"></i>
+                <span>Compliant private collective membership access</span>
+              </li>
+            </ul>
+          </div>
+          <button class="btn-claim-pass w-full py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white font-bold uppercase text-xs tracking-wider rounded-xl transition cursor-pointer font-mono" data-pass="week" data-price="R 25">
+            Get Week Pass
+          </button>
+        </div>
+
+        <!-- Pass 3: Month Pass -->
+        <div class="p-5 rounded-2xl bg-gradient-to-b from-emerald-950/20 to-zinc-900 border border-[#68bc34]/30 hover:border-[#68bc34]/60 transition duration-300 flex flex-col justify-between space-y-5 glow-green">
+          <div class="space-y-3">
+            <div class="flex justify-between items-start">
+              <div>
+                <span class="text-[10px] font-mono uppercase text-[#68bc34]">Premium Access</span>
+                <h3 class="text-lg font-display font-black text-white uppercase mt-0.5">Month Pass</h3>
+              </div>
+              <span class="py-1 px-2.5 rounded bg-[#68bc34] text-white font-mono text-xs font-black">
+                R 50
+              </span>
+            </div>
+            <ul class="space-y-2 text-[11px] text-zinc-350">
+              <li class="flex items-center gap-2">
+                <i data-lucide="check" class="w-3.5 h-3.5 text-[#68bc34] shrink-0"></i>
+                <span>Full access to dispensary catalog &amp; smoking lounge</span>
+              </li>
+              <li class="flex items-center gap-2">
+                <i data-lucide="check" class="w-3.5 h-3.5 text-[#68bc34] shrink-0"></i>
+                <span>In-store product reservation privileges</span>
+              </li>
+              <li class="flex items-center gap-2">
+                <i data-lucide="check" class="w-3.5 h-3.5 text-[#68bc34] shrink-0"></i>
+                <span>Compliant private collective membership access</span>
+              </li>
+            </ul>
+          </div>
+          <button class="btn-claim-pass w-full py-2.5 bg-[#68bc34] hover:bg-[#5aa32c] text-white font-extrabold uppercase text-xs tracking-wider rounded-xl transition shadow-lg shadow-[#68bc34]/10 cursor-pointer font-mono" data-pass="month" data-price="R 50">
+            Secure Month Pass
+          </button>
+        </div>
+
+      </div>
+
+      <p class="text-center text-[10px] text-zinc-500 mt-8 font-mono">
+        All passes require physical identification in-store. Verification is strictly 18+.
+      </p>
+    </div>
+  </div>
+
+  <!-- Same-Day Delivery Header bar -->
+  <div class="bg-[#68bc34] text-white py-2 px-4 text-xs font-semibold relative z-40 border-b border-[#5aa32c]">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2 px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center gap-6">
+        <a href="mailto:info@bulldogdispensary.co.za" class="flex items-center gap-1.5 hover:underline">
+          <i data-lucide="mail" class="w-3.5 h-3.5"></i>
+          info@bulldogdispensary.co.za
+        </a>
+        <a href="tel:0608345991" class="flex items-center gap-1.5 hover:underline font-mono">
+          <i data-lucide="phone" class="w-3.5 h-3.5"></i>
+          060 834 5991
+        </a>
+      </div>
+      <div class="flex items-center gap-4">
+        <span class="text-[10px] bg-white/20 px-2 py-0.5 rounded font-mono uppercase tracking-widest font-bold">Wellington Collective</span>
+        <div class="flex items-center gap-2">
+          <a href="https://instagram.com/the_bulldog_dispensary_" target="_blank" class="hover:opacity-80 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sticky Header Navigation -->
+  <nav class="sticky top-0 z-40 bg-white border-b border-zinc-100 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-20">
+        <!-- Logo -->
+        <a href="index.html" class="flex items-center gap-3 group">
+          <img src="./src/assets/images/bulldog_logo_1784640284638.jpg" alt="The Bulldog Wellington Logo" class="w-11 h-11 rounded-full object-cover shadow-md shadow-emerald-500/10 group-hover:scale-105 transition duration-300">
+          <div>
+            <span class="block font-display font-black text-xl text-zinc-900 leading-none tracking-tight uppercase group-hover:text-[#68bc34] transition duration-300">The Bulldog</span>
+            <span class="block font-mono text-[9px] tracking-[0.25em] text-[#68bc34] uppercase mt-1 font-bold">Wellington</span>
+          </div>
+        </a>
+
+        <!-- Desktop Nav Links -->
+        <div class="hidden md:flex items-center gap-8">
+          <a href="index.html" class="nav-link font-display font-bold text-xs uppercase tracking-widest transition duration-200 text-zinc-700 hover:text-[#68bc34]">Home</a>
+          <a href="catalog.html" class="nav-link font-display font-bold text-xs uppercase tracking-widest transition duration-200 text-zinc-700 hover:text-[#68bc34]">Menu</a>
+          <a href="about.html" class="nav-link font-display font-bold text-xs uppercase tracking-widest transition duration-200 text-zinc-700 hover:text-[#68bc34]">About</a>
+          <a href="contact.html" class="nav-link font-display font-bold text-xs uppercase tracking-widest transition duration-200 text-[#68bc34]">Contact</a>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="hidden md:flex items-center gap-4">
+          <button id="btn-unlock-access" class="py-2.5 px-5 bg-[#68bc34] hover:bg-[#5aa32c] text-white text-xs font-black rounded-full transition duration-200 uppercase tracking-widest flex items-center gap-2 shadow-md shadow-emerald-500/10 cursor-pointer">
+            <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+            R0.00 <span class="bg-white/20 text-[10px] px-1.5 py-0.5 rounded-full">0</span>
+          </button>
+          <a href="catalog.html" class="py-2.5 px-5 border border-zinc-200 text-zinc-800 hover:bg-zinc-50 hover:border-zinc-300 text-xs font-bold rounded-full transition duration-200 uppercase tracking-wider">
+            Explore Menu
+          </a>
+        </div>
+
+        <!-- Mobile Menu Toggle Button -->
+        <div class="flex md:hidden">
+          <button id="mobile-menu-toggle" class="p-2 rounded-xl text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50 transition duration-200 focus:outline-none" aria-label="Toggle Menu">
+            <i data-lucide="menu" id="menu-icon-open" class="w-6 h-6"></i>
+            <i data-lucide="x" id="menu-icon-close" class="w-6 h-6 hidden"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Navigation Drawer -->
+    <div id="mobile-menu" class="hidden md:hidden border-t border-zinc-100 bg-white px-4 py-6 space-y-3">
+      <a href="index.html" class="block px-4 py-3 rounded-xl font-display font-bold text-xs uppercase tracking-wider text-zinc-700 hover:bg-zinc-50 hover:text-[#68bc34]">Home</a>
+      <a href="catalog.html" class="block px-4 py-3 rounded-xl font-display font-bold text-xs uppercase tracking-wider text-zinc-700 hover:bg-zinc-50 hover:text-[#68bc34]">Menu</a>
+      <a href="about.html" class="block px-4 py-3 rounded-xl font-display font-bold text-xs uppercase tracking-wider text-zinc-700 hover:bg-zinc-50 hover:text-[#68bc34]">About</a>
+      <a href="contact.html" class="block px-4 py-3 rounded-xl font-display font-bold text-xs uppercase tracking-wider text-[#68bc34]">Contact</a>
+      <div class="pt-4 border-t border-zinc-100 space-y-3">
+        <button id="mobile-unlock-access" class="block w-full py-3 bg-[#68bc34] text-white font-black rounded-full text-center text-xs uppercase tracking-wider shadow-sm">
+          Unlock Club Pass
+        </button>
+        <a href="catalog.html" class="block w-full py-3 border border-zinc-200 text-zinc-800 font-bold rounded-full text-center text-xs uppercase tracking-wider">
+          Explore Menu
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content Container -->
+  <main class="flex-grow py-12 md:py-16 bg-[#f7f8fa]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <!-- Page Header -->
+      <div class="text-center max-w-3xl mx-auto mb-16 space-y-4">
+        <span class="inline-flex items-center px-4 py-1.5 rounded-full bg-[#68bc34]/15 text-[#68bc34] text-xs font-bold uppercase tracking-widest">
+          Contact &amp; Bookings
+        </span>
+        <h1 class="text-3xl sm:text-4xl md:text-5xl font-display font-black text-zinc-950 uppercase tracking-tight">Visit Us In Wellington</h1>
+        <p class="text-zinc-650 font-light leading-relaxed text-sm sm:text-base">
+          Come experience our secure, welcoming boutique dispensary and premium social lounge housed inside a gorgeous character building at 1 Rose Street. Pop in for a tailored consultation or reserve your private lounge session below.
+        </p>
+      </div>
+
+      <!-- Main Layout: 2 Columns -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+        
+        <!-- Column 1: Location & Support Details -->
+        <div class="lg:col-span-5 space-y-8">
+          
+          <!-- Contact Cards Grid -->
+          <div class="space-y-4">
+            
+            <!-- Address Card -->
+            <div class="flex items-start gap-4 p-5 rounded-2xl border border-zinc-100 bg-white">
+              <div class="flex items-center justify-center w-11 h-11 rounded-xl bg-[#68bc34]/10 text-[#68bc34] border border-[#68bc34]/20 shrink-0">
+                <i data-lucide="map-pin" class="w-5 h-5"></i>
+              </div>
+              <div class="space-y-1">
+                <h3 class="font-display font-bold text-zinc-900 text-base uppercase">Store Address</h3>
+                <p class="text-sm text-zinc-500 leading-relaxed font-light">
+                  Unit 6, 1 Rose St, Wellington, Western Cape, 7655
+                </p>
+                <p class="text-xs text-zinc-400 font-mono pt-1">
+                  Secure off-street character building premises.
+                </p>
+              </div>
+            </div>
+
+            <!-- Phone Card -->
+            <div class="flex items-start gap-4 p-5 rounded-2xl border border-zinc-100 bg-white">
+              <div class="flex items-center justify-center w-11 h-11 rounded-xl bg-[#68bc34]/10 text-[#68bc34] border border-[#68bc34]/20 shrink-0">
+                <i data-lucide="phone" class="w-5 h-5"></i>
+              </div>
+              <div class="space-y-1">
+                <h3 class="font-display font-bold text-zinc-900 text-base uppercase">Phone Support</h3>
+                <p class="text-sm text-zinc-600 font-mono">
+                  <a href="tel:0608345991" class="hover:text-[#68bc34] transition">060 834 5991</a>
+                </p>
+                <p class="text-xs text-zinc-400 leading-relaxed pt-1">
+                  Feel free to phone our desk directly for inquiries.
+                </p>
+              </div>
+            </div>
+
+            <!-- Social Card -->
+            <div class="flex items-start gap-4 p-5 rounded-2xl border border-zinc-100 bg-white">
+              <div class="flex items-center justify-center w-11 h-11 rounded-xl bg-[#68bc34]/10 text-[#68bc34] border border-[#68bc34]/20 shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+              </div>
+              <div class="space-y-1">
+                <h3 class="font-display font-bold text-zinc-900 text-base uppercase">Instagram Social</h3>
+                <p class="text-sm text-[#68bc34] font-medium hover:underline font-mono">
+                  <a href="https://instagram.com/the_bulldog_dispensary_" target="_blank">@the_bulldog_dispensary_</a>
+                </p>
+                <p class="text-xs text-zinc-400 leading-relaxed pt-1">
+                  Follow us for real-time announcements &amp; strain updates.
+                </p>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Trading Hours List -->
+          <div class="p-6 rounded-2xl border border-zinc-100 bg-white space-y-4">
+            <h3 class="font-display font-black text-zinc-900 text-base uppercase border-b border-zinc-100 pb-3">Trading Hours</h3>
+            <div class="space-y-3 text-sm text-zinc-605">
+              <div class="flex items-center justify-between">
+                <span>Monday - Saturday</span>
+                <span class="text-zinc-900 font-mono font-bold">9:00 AM - 9:00 PM</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span>Sunday</span>
+                <span class="text-zinc-900 font-mono font-bold">9:00 AM - 7:00 PM</span>
+              </div>
+            </div>
+            <div class="pt-2 border-t border-zinc-100 text-center">
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#68bc34]/10 text-[#68bc34] text-xs font-mono border border-[#68bc34]/20">
+                <span class="w-1.5 h-1.5 rounded-full bg-[#68bc34] animate-pulse"></span>
+                Open Today • Closes 9 PM
+              </span>
+            </div>
+          </div>
+
+          <!-- Quick Action Buttons -->
+          <div class="grid grid-cols-2 gap-4">
+            <a href="https://www.google.com/maps/dir/?api=1&destination=Unit+6,+1+Rose+St,+Wellington,+7655" target="_blank" class="py-4 px-5 bg-[#68bc34] hover:bg-[#5aa32c] text-white text-center text-xs font-black rounded-xl transition duration-200 flex items-center justify-center gap-2 uppercase tracking-wider cursor-pointer">
+              <i data-lucide="navigation" class="w-4 h-4"></i>
+              Get Directions
+            </a>
+            <a href="https://wa.me/27608345991?text=Hi%20Bulldog%20Dispensary,%20I'd%20like%20to%20ask%20a%20question..." target="_blank" class="py-4 px-5 bg-white hover:bg-zinc-50 text-zinc-800 text-center text-xs font-bold rounded-xl transition duration-200 border border-zinc-200 flex items-center justify-center gap-2 uppercase tracking-wider">
+              <i data-lucide="message-circle" class="w-4 h-4"></i>
+              WhatsApp Chat
+            </a>
+          </div>
+
+        </div>
+
+        <!-- Column 2: Booking Form & Google Map Embed -->
+        <div class="lg:col-span-7 space-y-8">
+          
+          <!-- Booking Form -->
+          <div class="rounded-2xl border border-zinc-100 bg-white p-6 sm:p-8 shadow-sm relative overflow-hidden">
+            <h3 class="font-display font-black text-xl text-zinc-900 uppercase tracking-tight mb-2">Book Your Lounge Session</h3>
+            <p class="text-xs text-zinc-500 mb-6">
+              Reserve your private social lounge consultation or collective membership slot below. This compiles a WhatsApp message with your request automatically.
+            </p>
+
+            <form id="spot-booking-form" class="space-y-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-[10px] text-zinc-500 font-mono uppercase tracking-wider mb-1.5 font-bold">Your Name</label>
+                  <input type="text" id="book-name" required placeholder="John Doe" class="w-full py-3 px-4 rounded-xl bg-[#f7f8fa] border border-zinc-200 text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-[#68bc34] text-sm">
+                </div>
+                <div>
+                  <label class="block text-[10px] text-zinc-500 font-mono uppercase tracking-wider mb-1.5 font-bold">Your Phone Number</label>
+                  <input type="tel" id="book-phone" required placeholder="082 123 4567" class="w-full py-3 px-4 rounded-xl bg-[#f7f8fa] border border-zinc-200 text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-[#68bc34] text-sm">
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-[10px] text-zinc-500 font-mono uppercase tracking-wider mb-1.5 font-bold">Select Request Type</label>
+                  <select id="book-service" class="w-full py-3 px-4 rounded-xl bg-[#f7f8fa] border border-zinc-200 text-zinc-900 focus:outline-none focus:border-[#68bc34] text-sm">
+                    <option value="Lounge Consultation (R100)">Private Lounge Consultation (R100)</option>
+                    <option value="Member Registration Inquiry">Member Pass Registration Inquiry</option>
+                    <option value="Dispensary Product Consultation">Dispensary Product Consultation</option>
+                    <option value="General Question / Feedback">General Question / Feedback</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-[10px] text-zinc-500 font-mono uppercase tracking-wider mb-1.5 font-bold">Preferred Date &amp; Time</label>
+                  <input type="text" id="book-datetime" placeholder="Friday 4 PM" required class="w-full py-3 px-4 rounded-xl bg-[#f7f8fa] border border-zinc-200 text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-[#68bc34] text-sm">
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-[10px] text-zinc-500 font-mono uppercase tracking-wider mb-1.5 font-bold">Special Requests</label>
+                <textarea id="book-notes" rows="3" placeholder="Any specific strain profile requests or notes..." class="w-full py-3 px-4 rounded-xl bg-[#f7f8fa] border border-zinc-200 text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-[#68bc34] text-sm"></textarea>
+              </div>
+
+              <button type="submit" class="w-full py-4 bg-[#68bc34] hover:bg-[#5aa32c] text-white font-black uppercase tracking-wider rounded-xl transition duration-200 text-xs cursor-pointer">
+                Submit Booking Request
+              </button>
+            </form>
+          </div>
+
+          <!-- Interactive Map Frame -->
+          <div class="rounded-2xl border border-zinc-100 bg-white p-4 shadow-sm relative overflow-hidden">
+            <div class="flex items-center justify-between pb-3 border-b border-zinc-100 mb-4 px-2">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-[#68bc34]"></span>
+                <span class="font-display font-bold text-xs text-zinc-900 uppercase tracking-wider">Unit 6, 1 Rose St Wellington Location</span>
+              </div>
+              <span class="font-mono text-[9px] text-zinc-400 uppercase font-bold">Interactive Map</span>
+            </div>
+
+            <!-- Google Map Iframe (Using the robust public embed, centered exactly on 1 Rose St) -->
+            <div class="rounded-xl overflow-hidden border border-zinc-100 h-[380px]">
+              <iframe 
+                class="w-full h-full border-0 opacity-90 contrast-125" 
+                src="https://maps.google.com/maps?q=Unit%206,%201%20Rose%20St,%20Wellington,%20South%20Africa&t=&z=16&ie=UTF8&iwloc=&output=embed" 
+                allowfullscreen="" 
+                loading="lazy" 
+                referrerpolicy="no-referrer">
+              </iframe>
+            </div>
+
+            <!-- Under Map Status Info Bar -->
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mt-4 px-2 pt-1 text-xs text-zinc-400 font-mono">
+              <span>Latitude: -33.6429 | Longitude: 19.0116</span>
+              <a href="https://www.google.com/maps/place/Unit+6,+1+Rose+St,+Wellington,+7655" target="_blank" class="text-[#68bc34] font-bold hover:underline flex items-center gap-1 uppercase">
+                Open in Google Maps Mobile
+                <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+              </a>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Shared Footer -->
+  <footer class="bg-[#0D0D0D] text-white border-t border-zinc-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 items-start">
+        
+        <!-- Store Info -->
+        <div class="space-y-4">
+          <div class="flex items-center gap-3">
+            <img src="./src/assets/images/bulldog_logo_1784640284638.jpg" alt="The Bulldog Wellington Logo" class="w-9 h-9 rounded-full object-cover">
+            <span class="font-display font-black text-lg text-white tracking-wider uppercase">THE BULLDOG</span>
+          </div>
+          <p class="text-sm text-zinc-400 max-w-sm leading-relaxed font-light">
+            Premium, certified boutique dispensary and lifestyle social lounge at 1 Rose Street, Wellington. Discover high-potency flower strains, edibles, accessories, and social community.
+          </p>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="space-y-4">
+          <h4 class="text-xs font-mono font-bold tracking-[0.2em] text-[#68bc34] uppercase">Quick Links</h4>
+          <div class="grid grid-cols-2 gap-2 text-sm text-zinc-400">
+            <a href="index.html" class="flex items-center gap-1.5 hover:text-[#68bc34] transition">
+              <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-[#68bc34]"></i>
+              Home
+            </a>
+            <a href="catalog.html" class="flex items-center gap-1.5 hover:text-[#68bc34] transition">
+              <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-[#68bc34]"></i>
+              Shop
+            </a>
+            <a href="about.html" class="flex items-center gap-1.5 hover:text-[#68bc34] transition">
+              <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-[#68bc34]"></i>
+              About Us
+            </a>
+            <a href="contact.html" class="flex items-center gap-1.5 hover:text-[#68bc34] transition">
+              <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-[#68bc34]"></i>
+              Contact
+            </a>
+          </div>
+        </div>
+
+        <!-- Contact & Newsletter -->
+        <div class="space-y-6">
+          <div class="space-y-4">
+            <h4 class="text-xs font-mono font-bold tracking-[0.2em] text-[#68bc34] uppercase">Contact Us</h4>
+            
+            <div class="space-y-3 text-sm text-zinc-400">
+              <div class="flex items-center gap-3">
+                <div class="flex items-center justify-center w-9 h-9 rounded-full bg-[#68bc34] text-white shrink-0">
+                  <i data-lucide="phone" class="w-4 h-4"></i>
+                </div>
+                <a href="tel:0608345991" class="hover:text-white transition font-mono">060 834 5991</a>
+              </div>
+              <div class="flex items-center gap-3">
+                <div class="flex items-center justify-center w-9 h-9 rounded-full bg-[#68bc34] text-white shrink-0">
+                  <i data-lucide="mail" class="w-4 h-4"></i>
+                </div>
+                <a href="mailto:info@bulldogdispensary.co.za" class="hover:text-white transition">info@bulldogdispensary.co.za</a>
+              </div>
+              <div class="flex items-center gap-3">
+                <div class="flex items-center justify-center w-9 h-9 rounded-full bg-[#68bc34] text-white shrink-0">
+                  <i data-lucide="map-pin" class="w-4 h-4"></i>
+                </div>
+                <span>Unit 6, 1 Rose St, Wellington, 7655</span>
+              </div>
+            </div>
+          </div>
+
+
+        </div>
+      </div>
+
+      <!-- Bottom Disclaimer & Copyright -->
+      <div class="mt-12 pt-8 border-t border-zinc-900 text-center space-y-4">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 text-red-400 text-[10px] font-mono border border-red-500/20 uppercase tracking-widest font-bold">
+          Strictly 18+ Only • ID Required
+        </div>
+        <p class="text-[11px] text-zinc-500 max-w-3xl mx-auto leading-relaxed font-light">
+          We fully comply with South African laws regarding private cultivation and consumption. All flower products are carefully curated, premium lab-tested boutique quality. No products are sold to or shared with minors. 
+        </p>
+      </div>
+    </div>
+
+    <!-- Green Copyright Footer strip -->
+    <div class="bg-[#68bc34] py-4 text-center text-[11px] text-white font-bold tracking-widest uppercase font-mono border-t border-[#5aa32c]">
+      &copy; <span id="copyright-year">2026</span> The Bulldog Wellington Social Club. All rights reserved.
+    </div>
+  </footer>
+
+  <!-- Shopping Cart Logic -->
+  <script src="./cart.js"></script>
+
+  <!-- Script for contact control -->
+  <script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyAoBr2Ke8oC4ENTXKoJKWvLETuMpYuLKnI",
+      authDomain: "bulldog-dispensary.firebaseapp.com",
+      projectId: "bulldog-dispensary",
+      storageBucket: "bulldog-dispensary.firebasestorage.app",
+      messagingSenderId: "148167709536",
+      appId: "1:148167709536:web:d305642ee81df950164405"
+    };
+
+    if (typeof firebase !== 'undefined') {
+      firebase.initializeApp(firebaseConfig);
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+      // Age Verification Gate Modal Logic
+      const ageGate = document.getElementById("age-gate");
+      const btnYes = document.getElementById("btn-verify-yes");
+      const btnNo = document.getElementById("btn-verify-no");
+
+      if (!localStorage.getItem("bulldog_age_verified")) {
+        ageGate.classList.remove("hidden");
+        document.body.classList.add("overflow-hidden");
+      }
+
+      btnYes.addEventListener("click", function() {
+        localStorage.setItem("bulldog_age_verified", "true");
+        ageGate.classList.add("hidden");
+        document.body.classList.remove("overflow-hidden");
+      });
+
+      btnNo.addEventListener("click", function() {
+        window.location.href = "https://www.google.com";
+      });
+
+      // Club Membership Modal Logic
+      const clubModal = document.getElementById("club-modal");
+      const closeClubBtn = document.getElementById("close-club-modal");
+      const unlockBtns = [];
+
+      function openMembershipModal() {
+        clubModal.classList.remove("hidden");
+        document.body.classList.add("overflow-hidden");
+      }
+
+      function closeMembershipModal() {
+        clubModal.classList.add("hidden");
+        document.body.classList.remove("overflow-hidden");
+      }
+
+      unlockBtns.forEach(btn => {
+        if (btn) {
+          btn.addEventListener("click", function(e) {
+            e.preventDefault();
+            openMembershipModal();
+          });
+        }
+      });
+
+      closeClubBtn.addEventListener("click", closeMembershipModal);
+
+      // Membership pass purchase (Direct Action inside the modal)
+      const passButtons = document.querySelectorAll(".btn-claim-pass");
+      passButtons.forEach(btn => {
+        btn.addEventListener("click", function() {
+          const passType = this.getAttribute("data-pass"); // 'day', 'week', 'month'
+          if (window.cartSystem && typeof window.cartSystem.selectMembership === 'function') {
+            window.cartSystem.selectMembership(passType);
+            window.cartSystem.openCart();
+          } else {
+            const passPrice = this.getAttribute("data-price") || "";
+            const messageText = `Hi Bulldog Wellington, I'd like to sign up for the ${passType} Pass (${passPrice}) at the 1 Rose Street Social Club today.`;
+            window.open(`https://wa.me/27608345991?text=${encodeURIComponent(messageText)}`, '_blank');
+          }
+          closeMembershipModal();
+        });
+      });
+
+      // Handle Booking Form Submission
+      const bookingForm = document.getElementById("spot-booking-form");
+      if (bookingForm) {
+        bookingForm.addEventListener("submit", function(e) {
+          e.preventDefault();
+          const name = document.getElementById("book-name").value;
+          const phone = document.getElementById("book-phone").value;
+          const service = document.getElementById("book-service").value;
+          const datetime = document.getElementById("book-datetime").value;
+          const notes = document.getElementById("book-notes").value;
+
+          const messageText = `Hi Bulldog Wellington! I would like to submit a Lounge or Membership booking inquiry:\n\n👤 Name: ${name}\n📞 Phone: ${phone}\n🟢 Request Type: ${service}\n📅 Date/Time: ${datetime}\n📝 Notes: ${notes}`;
+          
+          window.open(`https://wa.me/27608345991?text=${encodeURIComponent(messageText)}`, '_blank');
+        });
+      }
+
+      // Update copyright year
+      const yrSpan = document.getElementById("copyright-year");
+      if (yrSpan) {
+        yrSpan.textContent = new Date().getFullYear();
+      }
+
+      // Highlight active nav links
+      const currentPath = window.location.pathname.split("/").pop() || "index.html";
+      document.querySelectorAll(".nav-link").forEach(link => {
+        if (link.getAttribute("href") === currentPath) {
+          link.classList.add("text-[#68bc34]", "font-black");
+          link.classList.remove("text-zinc-700");
+        } else {
+          link.classList.add("text-zinc-700", "hover:text-[#68bc34]");
+        }
+      });
+
+      // Mobile Menu Toggle
+      const menuBtn = document.getElementById("mobile-menu-toggle");
+      const mobileMenu = document.getElementById("mobile-menu");
+      const openIcon = document.getElementById("menu-icon-open");
+      const closeIcon = document.getElementById("menu-icon-close");
+
+      menuBtn.addEventListener("click", function() {
+        const isHidden = mobileMenu.classList.contains("hidden");
+        if (isHidden) {
+          mobileMenu.classList.remove("hidden");
+          openIcon.classList.add("hidden");
+          closeIcon.classList.remove("hidden");
+        } else {
+          mobileMenu.classList.add("hidden");
+          openIcon.classList.remove("hidden");
+          closeIcon.classList.add("hidden");
+        }
+      });
+    });
+  </script>
+</body>
+</html>

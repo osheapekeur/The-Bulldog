@@ -1,0 +1,6 @@
+{
+  "name": "The Bulldog Dispensary Wellington",
+  "description": "A premium boutique cannabis store located in Wellington, South Africa, offering high-quality curated flower, edibles, vapes, and accessories.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
